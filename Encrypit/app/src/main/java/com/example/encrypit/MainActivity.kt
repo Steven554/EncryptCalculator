@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 
         Equals.setOnClickListener {
             val expressionString = topDisplay.text.toString()
-            if (expressionString == "5") {
+            if (expressionString == "911") {
                 loadNewActivity()
             }
                 val expression = ExpressionBuilder(topDisplay.text.toString()).build()
@@ -76,6 +76,5 @@ class MainActivity : AppCompatActivity() {
             bottomDisplay.text = ""
         }
     }
-
 }
 

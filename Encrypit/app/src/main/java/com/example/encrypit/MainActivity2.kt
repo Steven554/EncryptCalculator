@@ -3,6 +3,9 @@ package com.example.encrypit
 import android.annotation.SuppressLint
 import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Environment
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.text.InputType
 import android.view.View
 import android.widget.Button
@@ -13,11 +16,11 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main2.*
 import java.io.File
+import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import javax.crypto.spec.IvParameterSpec
-
+import javax.crypto.spec.GCMParameterSpec
 
 class MainActivity2 : AppCompatActivity() {
     @SuppressLint("SetTextI18n", "ResourceType")
@@ -26,117 +29,71 @@ class MainActivity2 : AppCompatActivity() {
         setContentView(R.layout.activity_main2)
 
         val context = applicationContext
-        val path = context.filesDir
+        val path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
 
-        // Create new file
+//        val sharedPref = context.getSharedPreferences(
+//            getString(R.string.preference_file_key), context.private)
+
+        // Create new plaintext file
         val fileName = "data.txt"
         var testfile = File(path, fileName)
-        testfile.createNewFile()
 
-        // Create new file
-        val encFileName = "encryptedFile.txt"
-        var encFile = File(path, encFileName)
-        encFile.createNewFile()
+        if (testfile.createNewFile()) {
+            println("File created")
+        } else {
+            println("File already exists")
+            textViewField.text = testfile.readText()
+        }
 
-        // Key and Cipher generation
-        val keygen = KeyGenerator.getInstance("AES")
-        keygen.init(256)
-        val key: SecretKey = keygen.generateKey()
-        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
-        var cipherText = "holder".toByteArray()
-        // setting IV
-        val ivBytes = byteArrayOf(
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00,
-            0x00
-        )
-        val ivParameterSpec = IvParameterSpec(ivBytes)
+        // Create new calc password file
+        val calcCode = "5"
+        val calcCodeFile = File(path, fileName)
 
-        // Text to be encrypted
-        var currText: String
+        if (calcCodeFile.createNewFile()) {
+            println("File created")
+            calcCodeFile.writeText(calcCode)
+        } else {
+            println("File already exists")
+        }
 
-        // Password
-        val requiredPwd = "Encrypit"
-        var pwdHolder = ""
+        // Cipher IV
+        lateinit var iv : ByteArray
+
+        lateinit var pwdCalcHolder : String
+
+        // Key alias holder
+        lateinit var aliasHolder : String
 
         // Text view field which contents are encrypted
         textViewField.setOnClickListener() {
-            if (pwdHolder == requiredPwd) {
-                try {
-                    if (textViewField.text == null) {
-                        textViewField.text = "Secret text"
-                    }
-                    textViewField.setCursorVisible(true);
-                    textViewField.setFocusableInTouchMode(true);
-                    textViewField.setInputType(InputType.TYPE_CLASS_TEXT);
-                    textViewField.requestFocus(); //to trigger the soft input
-                    currText = textViewField.text.toString()
+            try {
+                textViewField.setCursorVisible(true)
+                textViewField.setFocusableInTouchMode(true)
+                textViewField.setInputType(InputType.TYPE_CLASS_TEXT)
+//                textViewField.isElegantTextHeight = true
+//                textViewField.inputType = InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE
+//                textViewField.isSingleLine =  false
+                textViewField.requestFocus()
 
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    // Exception prints failure
-                    Toast.makeText(this@MainActivity2, "Encryption Failure!", Toast.LENGTH_LONG)
-                        .show()
-                }
-                currText = textViewField.text.toString()
-            }
-            else{
-                Toast.makeText(this@MainActivity2, "Incorrect Password!", Toast.LENGTH_LONG)
-                    .show()
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
-
-        // Save Button
-        // Must be hit before encryption
-        var textHolder = ""
-        val saveBut = findViewById<View>(R.id.save) as Button
-        saveBut.setOnClickListener {
-            if (pwdHolder == requiredPwd) {
-                try {
-
-                    textHolder = textViewField.text.toString()
-
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    // Exception prints failure
-                    Toast.makeText(this@MainActivity2, "Save Failure!", Toast.LENGTH_LONG).show()
-                }
-            }
-            else{
-                Toast.makeText(this@MainActivity2, "Incorrect Password!", Toast.LENGTH_LONG)
-                    .show()
-            }
-        }
-
-        // Password Button
-        // Invisible, just below Encrypt & Decrypt buttons
-        val pwdBut = findViewById<View>(R.id.passwordField) as Button
-        pwdBut.setOnClickListener {
+        // Alias field button as an AlertDialogue
+        val aliasBut = findViewById<View>(R.id.passwordField) as Button
+        aliasBut.setOnClickListener {
             try {
                 val alertDialog = AlertDialog.Builder(this).create()
-                alertDialog.setMessage("Password")
+//                alertDialog.setMessage("")
                 var pwdInputField = EditText(this)
                 alertDialog.setView(pwdInputField)
 
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK",
-                    DialogInterface.OnClickListener { dialog, which ->
-                        // Storing password for comparison in other buttons
-                        pwdHolder = pwdInputField.text.toString()
-                    })
+                // OK Button in AlertDialogue
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Store Key") { dialog, which ->
+                    // Storing password for comparison in other buttons
+                    aliasHolder = pwdInputField.text.toString()
+                }
 
                 alertDialog.show()
 
@@ -149,59 +106,110 @@ class MainActivity2 : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-//        userInput.inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+
+        //  Calc pwd button as an AlertDialogue
+        val calcPwd = findViewById<View>(R.id.calcPwd) as Button
+        calcPwd.setOnClickListener {
+            try {
+                val alertDialog = AlertDialog.Builder(this).create()
+//                alertDialog.setMessage("")
+                var pwdCalcField = EditText(this)
+                alertDialog.setView(pwdCalcField)
+
+                // OK Button in AlertDialogue
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "OK") { dialog, which ->
+                    // Storing password for comparison in other buttons
+                    pwdCalcHolder  = pwdCalcField.text.toString()
+                }
+
+                alertDialog.show()
+
+                // Sets OK button centered
+                val btnPositive = alertDialog.getButton(AlertDialog.BUTTON_POSITIVE)
+                val layoutParams = btnPositive.layoutParams as LinearLayout.LayoutParams
+                layoutParams.weight = 10f
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
 
         // Encrypt Button
         val encryptBut = findViewById<View>(R.id.Encrypt) as Button
         encryptBut.setOnClickListener {
-            println("pwd holder: $pwdHolder")
-            println("required pwd: $requiredPwd")
-            if (pwdHolder == requiredPwd) {
-                try {
-                    // Generate a key from password, encrypt text with it
-                    cipher.init(Cipher.ENCRYPT_MODE, key, ivParameterSpec)
-                    cipherText = cipher.doFinal(textHolder.toByteArray())
+            try {
+                // Instance of Androids KeyGenerator
+                val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
 
-                    var str = String(cipherText)
-                    textViewField.text = str
+                // build KeyGenParameterSpec with parameters of key, storing in keystore using keystore alias
+                val keyGenParameterSpec = KeyGenParameterSpec.Builder(
+                    // aliasHolder is user defined key alias
+                    aliasHolder, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT)
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .build()
 
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    // Exception prints failure
-                    Toast.makeText(this@MainActivity2, "Encryption Failure!", Toast.LENGTH_LONG)
-                        .show()
-                }
-            }
-            else{
-                Toast.makeText(this@MainActivity2, "Incorrect Password!", Toast.LENGTH_LONG)
+                keyGenerator.init(keyGenParameterSpec)
+                val secretKey = keyGenerator.generateKey()
+
+                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+
+                // Passing IV to outer scope so it can by used by decryption
+                iv = cipher.iv
+
+                var holder = textViewField.text.toString()
+
+                val encryption = cipher.doFinal(holder.toByteArray()) // default UTF-8
+
+                testfile.writeBytes(encryption)
+
+//                textViewField.isElegantTextHeight = true
+//                textViewField.inputType = InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE
+//                textViewField.isSingleLine =  false
+
+                textViewField.text = testfile.readText()
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Exception prints failure
+                Toast.makeText(this@MainActivity2, "Encryption Failure!", Toast.LENGTH_LONG)
                     .show()
             }
         }
 
-        // DECRYPT BUTTON
+        // Decrypt button
         val decBut = findViewById<View>(R.id.Decrypt) as Button
         decBut.setOnClickListener {
-            if (pwdHolder == requiredPwd) {
                 try {
-                    cipher.init(Cipher.DECRYPT_MODE, key, ivParameterSpec)
-                    val decrText: ByteArray = cipher.doFinal(cipherText)
-                    val decryptString = String(decrText)
-                    println("decrypted text: $decryptString")
-                    textViewField.text = decryptString
+                    // Creating keystore instance
+                    val keyStore = KeyStore.getInstance("AndroidKeyStore")
+                    keyStore.load(null)
+
+                    // Gets our secret key from keystore with alias
+                    val secretKeyEntry = keyStore
+                        .getEntry(aliasHolder, null) as KeyStore.SecretKeyEntry
+
+                    val decrsecretKey: SecretKey = secretKeyEntry.secretKey
+                    val cipher =
+                        Cipher.getInstance("AES/GCM/NoPadding")
+                    // Passing encryption IV to decryption cipher
+//                    val spec = GCMParameterSpec(128, iv)
+                    cipher.init(Cipher.DECRYPT_MODE, decrsecretKey)//spec
+
+                    val encryption = cipher.doFinal(testfile.readBytes())
+
+                    testfile.writeBytes(encryption)
+
+                    textViewField.text = testfile.readText()
 
                 } catch (e: Exception) {
                     e.printStackTrace()
-
                     // Exception prints failure
                     Toast.makeText(this@MainActivity2, "Decryption Failed!", Toast.LENGTH_LONG)
                         .show()
                 }
-            }
-                else{
-                    Toast.makeText(this@MainActivity2, "Incorrect Password!", Toast.LENGTH_LONG)
-                        .show()
-                }
-            }
+        }
     }
-
 }
+

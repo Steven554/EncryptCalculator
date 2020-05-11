@@ -59,6 +59,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="android.sdk.path" value="$USER_HOME$/Library/Android/sdk" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="not.eligible.for.single.variant.sync" value="true" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.17" />
     <property name="project.structure.side.proportion" value="0.2" />
@@ -259,9 +260,10 @@
     <servers />
   </component>
   <component name="WindowStateProjectService">
-    <state x="973" y="564" key="com.intellij.ide.util.TipDialog" timestamp="1588959185941">
-      <screen x="0" y="23" width="2560" height="1417" />
+    <state x="506" y="-876" key="com.intellij.ide.util.TipDialog" timestamp="1589046582360">
+      <screen x="-467" y="-1417" width="2560" height="1417" />
     </state>
+    <state x="506" y="-876" key="com.intellij.ide.util.TipDialog/-467.-1417.2560.1417/0.23.1440.877@-467.-1417.2560.1417" timestamp="1589046582360" />
     <state x="973" y="564" key="com.intellij.ide.util.TipDialog/0.23.2560.1417/-1080.-107.1080.1897/214.1463.1440.877@0.23.2560.1417" timestamp="1588959185941" />
     <state x="973" y="564" key="com.intellij.ide.util.TipDialog/0.23.2560.1417@0.23.2560.1417" timestamp="1588856913467" />
   </component>

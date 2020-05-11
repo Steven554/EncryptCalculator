@@ -6,73 +6,56 @@
     android:layout_height="match_parent">
 
 
-
-
-
-
-<!--    <EditText-->
-<!--        android:id="@+id/input"-->
-<!--        android:layout_width="270dp"-->
-<!--        android:layout_height="117dp"-->
-<!--        android:layout_marginTop="144dp"-->
-<!--        android:hint="Password"-->
-<!--        android:imeOptions="actionDone"-->
-<!--        android:inputType="textPassword"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintHorizontal_bias="0.496"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent"-->
-<!--        android:autofillHints="" />-->
-
     <TextView
         android:id="@+id/textViewField"
+        android:lines="4"
         android:layout_width="327dp"
         android:layout_height="319dp"
         android:layout_marginStart="40dp"
         android:layout_marginTop="76dp"
-        android:text="@string/hello"
+
+        android:shadowColor="@android:color/white"
+        android:shadowDx="3"
+        android:shadowDy="4"
+        android:shadowRadius="50"
+
+        android:text="Enter Secret Stuff"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        />
+         />
 
-    <View
-        android:layout_width="@+id/textViewField"
-        android:layout_height="0.2dp"
-        android:id="@+id/separator"
-        android:visibility="visible"
-        android:background="@android:color/darker_gray"
-        tools:ignore="MissingConstraints" />
-
-    <Button
-        android:id="@+id/save"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="276dp"
-        android:text="save"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.609"
-        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/passwordField"
-        android:background="@android:color/transparent"
-        android:layout_width="170dp"
-        android:layout_height="98dp"
-        android:layout_marginStart="120dp"
+        android:layout_width="94dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="144dp"
+        android:text="Key Alias"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.924"
+        app:layout_constraintVertical_bias="0.613"
+        tools:ignore="MissingConstraints" />
+
+
+    <Button
+        android:id="@+id/calcPwd"
+        android:layout_width="94dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="144dp"
+        android:text="Calc Pwd"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.876"
         tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/Encrypt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="104dp"
-        android:layout_marginTop="508dp"
+        android:layout_marginStart="56dp"
+        android:layout_marginTop="500dp"
         android:text="@string/encrypt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -82,8 +65,8 @@
         android:id="@+id/Decrypt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="204dp"
-        android:layout_marginTop="508dp"
+        android:layout_marginStart="236dp"
+        android:layout_marginTop="500dp"
         android:text="@string/decrypt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
