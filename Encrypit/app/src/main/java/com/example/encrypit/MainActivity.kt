@@ -1,6 +1,8 @@
 package com.example.encrypit
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import kotlinx.android.synthetic.main.activity_main.*
@@ -8,6 +10,17 @@ import net.objecthunter.exp4j.ExpressionBuilder
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val context = applicationContext
+
+        var calcPasscode = "45"
+        val key = "thisKey"
+        val calc = context.getSharedPreferences("holder", Context.MODE_PRIVATE)
+        val editor: SharedPreferences.Editor = calc.edit()
+        editor.putString(key, calcPasscode)
+        editor.apply()
+
+
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -47,7 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         Equals.setOnClickListener {
             val expressionString = topDisplay.text.toString()
-            if (expressionString == "911") {
+            if (expressionString == calcPasscode) {
                 loadNewActivity()
             }
                 val expression = ExpressionBuilder(topDisplay.text.toString()).build()

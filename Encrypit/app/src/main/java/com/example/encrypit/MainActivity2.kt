@@ -1,7 +1,9 @@
 package com.example.encrypit
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.DialogInterface
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.os.Environment
 import android.security.keystore.KeyGenParameterSpec
@@ -31,9 +33,6 @@ class MainActivity2 : AppCompatActivity() {
         val context = applicationContext
         val path = context.getExternalFilesDir(Environment.DIRECTORY_DOCUMENTS)
 
-//        val sharedPref = context.getSharedPreferences(
-//            getString(R.string.preference_file_key), context.private)
-
         // Create new plaintext file
         val fileName = "data.txt"
         var testfile = File(path, fileName)
@@ -46,12 +45,11 @@ class MainActivity2 : AppCompatActivity() {
         }
 
         // Create new calc password file
-        val calcCode = "5"
-        val calcCodeFile = File(path, fileName)
+        val calcCodeFile = File(path, "holder")
 
         if (calcCodeFile.createNewFile()) {
             println("File created")
-            calcCodeFile.writeText(calcCode)
+            calcCodeFile.writeText("911")
         } else {
             println("File already exists")
         }
@@ -70,9 +68,6 @@ class MainActivity2 : AppCompatActivity() {
                 textViewField.setCursorVisible(true)
                 textViewField.setFocusableInTouchMode(true)
                 textViewField.setInputType(InputType.TYPE_CLASS_TEXT)
-//                textViewField.isElegantTextHeight = true
-//                textViewField.inputType = InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE
-//                textViewField.isSingleLine =  false
                 textViewField.requestFocus()
 
             } catch (e: Exception) {
@@ -80,7 +75,7 @@ class MainActivity2 : AppCompatActivity() {
             }
         }
 
-        // Alias field button as an AlertDialogue
+        // Pwd field button as an AlertDialogue
         val aliasBut = findViewById<View>(R.id.passwordField) as Button
         aliasBut.setOnClickListener {
             try {
@@ -90,7 +85,7 @@ class MainActivity2 : AppCompatActivity() {
                 alertDialog.setView(pwdInputField)
 
                 // OK Button in AlertDialogue
-                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Store Key") { dialog, which ->
+                alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Enter Password") { dialog, which ->
                     // Storing password for comparison in other buttons
                     aliasHolder = pwdInputField.text.toString()
                 }
@@ -164,10 +159,6 @@ class MainActivity2 : AppCompatActivity() {
 
                 testfile.writeBytes(encryption)
 
-//                textViewField.isElegantTextHeight = true
-//                textViewField.inputType = InputType.TYPE_TEXT_FLAG_IME_MULTI_LINE
-//                textViewField.isSingleLine =  false
-
                 textViewField.text = testfile.readText()
 
             } catch (e: Exception) {
@@ -194,8 +185,8 @@ class MainActivity2 : AppCompatActivity() {
                     val cipher =
                         Cipher.getInstance("AES/GCM/NoPadding")
                     // Passing encryption IV to decryption cipher
-//                    val spec = GCMParameterSpec(128, iv)
-                    cipher.init(Cipher.DECRYPT_MODE, decrsecretKey)//spec
+                    val spec = GCMParameterSpec(128, iv)
+                    cipher.init(Cipher.DECRYPT_MODE, decrsecretKey, spec)
 
                     val encryption = cipher.doFinal(testfile.readBytes())
 
